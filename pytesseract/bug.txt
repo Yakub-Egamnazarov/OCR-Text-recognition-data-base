@@ -1,0 +1,4 @@
+TODO - 1: Need to sort out correctly when scanning the folders and writing  a new file
+
+6823.img
+6824.img difficult to extract necessary data
