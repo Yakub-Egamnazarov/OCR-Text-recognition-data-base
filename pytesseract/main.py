@@ -161,13 +161,14 @@ def get_delegate_name(lst):
 def get_email(lst, websites):
     
     website_index = False
+    email_index = False
     for count, el in enumerate(lst):
         if 'Email' in el:
             email_index = count
         if 'Website' in el:
             website_index = count
     
-    if website_index:
+    if website_index and email_index:
         s = ', '.join(lst[email_index:website_index])
     else:
         s = ', '.join(lst[email_index:])
@@ -215,16 +216,18 @@ def get_website(lst):
 
 def get_fax(lst):
     fax_index = False
+    email_index = False
     for count, el in enumerate(lst):
         if 'Fax' in el:
             fax_index = count
+
         if 'Email' in el:
             email_index = count
     
-    if fax_index:
+    if fax_index and email_index:
         s = ', '.join(lst[fax_index : email_index])
         
-        pattern = re.compile(r'(\+\d+\s\d+)(\s\d+)?(\s/\s\d+)?')
+        pattern = re.compile(r'(\(?\+\d+\)?\s\d+)(\s\d+)?(\s/\s\d+)?')
         
         return [match.group() for match in pattern.finditer(s)]
 
@@ -251,8 +254,21 @@ def get_tel(lst):
     else:
         s = ', '.join(lst[tel_index : email_index])
 
+    square_pattern = re.compile(r'\[\+\d+\]\s\d+')
     
-    pattern = re.compile(r'(\+\d+\]?\s\d+(\s\d+)?)(\sext\.\s\d+)?', re.IGNORECASE)
+    matches = square_pattern.finditer(s)
+    for match in matches:
+        # print(match.group(), '=> match')
+        r = match.group()
+        if r:
+            # print('changing...')
+            print(r)
+            s = '(' + r[1 : r.index("]")] + ')' + r[r.index(' ') : ]
+            # print(s)
+            
+            
+    
+    pattern = re.compile(r'(\(?\+\d+\)?\]?\s\d+(\s\d+)?)(\sext\.\s\d+)?', re.IGNORECASE)
     sub_pattern = re.compile(r'\]')
     
     s = sub_pattern.sub('1', s)
@@ -260,11 +276,29 @@ def get_tel(lst):
 
 
 def get_country(address):
+    
+
+
+    if address.endswith(','):
+        address = address[:-1]
 
     pattern = re.compile(r'\d+?')
-    lst = pattern.split(address.split(',')[-1])
+    
+    if address.split(', ')[-1].isdigit():
+        print(True)
+        lst = pattern.split(address.split(', ')[-2])
+    else:
+        lst = pattern.split(address.split(', ')[-1])
+        
+    
+    try: 
+        
+        lst = list(filter(None, [el.strip() for el in lst]))[-1]
+    except: 
+        lst = ''
+        print('exception')
 
-    return list(filter(None, [el.strip() for el in lst]))[-1]
+    return lst 
 
 
 def get_address(lst):
